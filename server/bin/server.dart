@@ -52,7 +52,10 @@ Future<Response> _createGameHandler(Request request) async {
       formData.name: await formData.part.readString(),
   };
   log.info("Received body: $parameters");
-  final json = jsonDecode(parameters["events"] ?? "[]") as List<dynamic>;
+  if (!parameters.containsKey("events")) {
+    return Response.badRequest(body: "form data does not include events");
+  }
+  final json = jsonDecode(parameters["events"]!) as List<dynamic>;
   final events = json.map((son) => son as String).toList();
   if (events.length != 25) {
     return Response.badRequest(body: "need 25 events to create a game");
