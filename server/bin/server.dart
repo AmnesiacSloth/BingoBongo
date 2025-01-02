@@ -34,7 +34,7 @@ Future<Response> _createUserHandler(Request request) async {
         ),
       );
 
-  return Response.ok(user.toJson());
+  return Response.ok(user.toJsonString());
 }
 
 Future<Response> _createGameHandler(Request request) async {
@@ -64,10 +64,10 @@ Future<Response> _createGameHandler(Request request) async {
 
   final board = await createBoardForGame(uId: uId, game: game);
 
-  return Response.ok({
+  return Response.ok(jsonEncode({
     "game": game.toJson(),
     "board": board.toJson(),
-  });
+  }));
 }
 
 Future<Response> _getGameHandler(Request request) async {
@@ -109,10 +109,10 @@ Future<Response> _joinHandler(Request request) async {
     boardIds: Value(jsonEncode(boardIds)),
   ));
 
-  return Response.ok({
+  return Response.ok(jsonEncode({
     "game": game.toJson(),
     "board": board.toJson(),
-  });
+  }));
 }
 
 Future<Response> _playHandler(Request request) async {
@@ -145,7 +145,7 @@ Future<Response> _playHandler(Request request) async {
 
   // TODO(casey): Check if someone won
 
-  return Response.ok({"game": newGame.first.toJson()});
+  return Response.ok(jsonEncode({"game": newGame.first.toJson()}));
 }
 
 Future<Board> createBoardForGame({
