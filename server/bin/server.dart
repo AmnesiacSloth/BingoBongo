@@ -3,23 +3,63 @@ import 'dart:io';
 
 import 'package:drift/drift.dart';
 import 'package:server/database.dart';
+import 'package:server/log.dart';
 import 'package:shelf/shelf.dart';
 import 'package:shelf/shelf_io.dart';
+import 'package:shelf_multipart/shelf_multipart.dart';
 import 'package:shelf_router/shelf_router.dart';
 
 // Configure routes.
 final _router = Router()
-  ..get('/create', _createGameHandler)
+  ..post('/createUser', _createUserHandler)
+  ..post('/create', _createGameHandler)
   ..get('/game/<id>', _getGameHandler)
-  ..get('/game/<id>/play/<event>', _playHandler)
+  ..post('/game/<id>/play/<event>', _playHandler)
   ..get('/join/<id>', _joinHandler);
+
+Future<Response> _createUserHandler(Request request) async {
+  final form = request.formData();
+  if (form == null) {
+    return Response.badRequest(body: "No multipart form body");
+  }
+  // Read all form-data parameters into a single map:
+  final parameters = <String, String>{
+    await for (final formData in form.formData)
+      formData.name: await formData.part.readString(),
+  };
+  log.info("Received body: $parameters");
+  final user = await database.into(database.users).insertReturning(
+        UsersCompanion(
+          displayName: Value(parameters["displayName"] ?? "Player"),
+        ),
+      );
+
+  return Response.ok(user.toJsonString());
+}
 
 Future<Response> _createGameHandler(Request request) async {
   final uId = userId(request);
   if (uId == null) {
     return Response.badRequest(body: "USER_ID is not valid");
   }
-  final events = jsonDecode(request.params["events"] ?? "[]") as List<String>;
+  log.info("Creating game for $uId");
+  final form = request.formData();
+  if (form == null) {
+    return Response.badRequest(body: "No multipart form body");
+  }
+  // Read all form-data parameters into a single map:
+  final parameters = <String, String>{
+    await for (final formData in form.formData)
+      formData.name: await formData.part.readString(),
+  };
+  log.info("Received body: $parameters");
+  if (!parameters.containsKey("events")) {
+    return Response.badRequest(body: "form data does not include events");
+  }
+  log.info("Parsed parameters $parameters");
+  final json = jsonDecode(parameters["events"]!) as List<dynamic>;
+  log.info("Parsed $json");
+  final events = json.map((son) => son as String).toList();
   if (events.length != 25) {
     return Response.badRequest(body: "need 25 events to create a game");
   }
@@ -30,10 +70,10 @@ Future<Response> _createGameHandler(Request request) async {
 
   final board = await createBoardForGame(uId: uId, game: game);
 
-  return Response.ok({
+  return Response.ok(jsonEncode({
     "game": game.toJson(),
     "board": board.toJson(),
-  });
+  }));
 }
 
 Future<Response> _getGameHandler(Request request) async {
@@ -69,16 +109,17 @@ Future<Response> _joinHandler(Request request) async {
 
   final boardIds = jsonDecode(game!.boardIds) as List<int>;
   boardIds.add(board.id);
+  log.info("Adding ${board.id} to $id");
 
   (database.update(database.games)..where((row) => row.id.equals(game.id)))
       .write(GamesCompanion(
     boardIds: Value(jsonEncode(boardIds)),
   ));
 
-  return Response.ok({
+  return Response.ok(jsonEncode({
     "game": game.toJson(),
     "board": board.toJson(),
-  });
+  }));
 }
 
 Future<Response> _playHandler(Request request) async {
@@ -101,6 +142,8 @@ Future<Response> _playHandler(Request request) async {
   final events = jsonDecode(game!.events) as List<int>;
   events.add(event);
 
+  log.info("Adding $event to game $id");
+
   final newGame = await (database.update(database.games)
         ..whereSamePrimaryKey(game))
       .writeReturning(
@@ -111,7 +154,7 @@ Future<Response> _playHandler(Request request) async {
 
   // TODO(casey): Check if someone won
 
-  return Response.ok({"game": newGame.first.toJson()});
+  return Response.ok(jsonEncode({"game": newGame.first.toJson()}));
 }
 
 Future<Board> createBoardForGame({
@@ -119,8 +162,10 @@ Future<Board> createBoardForGame({
   required Game game,
 }) async {
   final board = await createBoard(uId: uId);
+  log.info("Created board ${board.id}");
 
-  final boardIds = jsonDecode(game.boardIds) as List<int>;
+  final json = jsonDecode(game.boardIds) as List<dynamic>;
+  final boardIds = json.map((son) => son as int).toList();
   boardIds.add(board.id);
 
   (database.update(database.games)..where((row) => row.id.equals(game.id)))
@@ -129,6 +174,8 @@ Future<Board> createBoardForGame({
       boardIds: Value(jsonEncode(boardIds)),
     ),
   );
+
+  log.info("Added board ${board.id} to game ${game.id}");
 
   return board;
 }
@@ -146,6 +193,7 @@ Future<Game> createGame({
           name: Value(name),
         ),
       );
+  log.info("Created game ${game.id}");
 
   return game;
 }
@@ -159,13 +207,16 @@ Future<Board> createBoard({
   events.shuffle();
 
   // Remove the wild card, and explicitly put it in the middle.
-  final middle = (5 * 2) + 3 - 1; // 2nd row, 3rd square, start at 0
+  const middle = (5 * 2) + 3 - 1; // 2nd row, 3rd square, start at 0
   events.removeWhere((e) => e == middle);
   events.insert(middle, middle);
+
+  log.info("Shuffled events to $events");
 
   final board = await database.into(database.boards).insertReturning(
         BoardsCompanion(
           board: Value(jsonEncode(events)),
+          playerId: Value(uId),
         ),
       );
 
@@ -179,17 +230,18 @@ int? gameId(Request request) {
 }
 
 int? userId(Request request) {
+  log.fine("Checking headers: ${request.headers}");
   final id = int.tryParse(request.headers["USER_ID"] ?? "");
   return id;
 }
 
 Future<Game?> getGameFromId(int id) async {
   // TODO: Error handle
+  log.info("Looking up game $id");
   final game = await (database.select(database.games)
         ..where((row) => row.id.equals(id)))
-      .watchSingle()
-      .first;
-  return game;
+      .get();
+  return game.firstOrNull;
 }
 
 final database = AppDatabase();

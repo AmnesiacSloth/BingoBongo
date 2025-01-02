@@ -1,8 +1,11 @@
+import 'package:bingo_bongo/api/rest.dart';
 import 'package:flutter/material.dart';
 
 // -- Widgets -- //
 import 'widgets/CustomAppBar.dart';
 import 'widgets/board.dart';
+
+final api = RestApi();
 
 void main() {
   runApp(const MyApp());
