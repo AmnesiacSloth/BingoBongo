@@ -6,18 +6,26 @@ class FloatingTooltip {
     required BuildContext context,
     required String messages,
   }) {
+    bool isRemoved = false;
     // get flutter's overlay
     final overlay = Overlay.of(context);
-
-    final overlayEntry = OverlayEntry(builder: (BuildContext overlayContext) {
-      return Center(
-        child: Material(
-          color: const Color.fromARGB(0, 0, 0, 0),
-          child: Tooltip(
-            message: messages,
-            child: Container(
+    late OverlayEntry overlayEntry;
+    overlayEntry = OverlayEntry(builder: (BuildContext overlayContext) {
+      return GestureDetector(
+        onTap: () {
+          if (!isRemoved) {
+            isRemoved = true;
+            overlayEntry.remove();
+          }
+        },
+        // this container wraps the whole screen for gesture detector including appbar
+        child: Container(
+          color: Colors.transparent,
+          child: Center(
+            child: Material(
+              color: Colors.transparent,
+              child: Container(
                 width: 300,
-                height: 60,
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
                   color: Colors.black54,
@@ -25,9 +33,11 @@ class FloatingTooltip {
                 ),
                 child: Text(
                   messages,
-                  style: const TextStyle(color: Colors.white),
+                  style: const TextStyle(color: Colors.white, fontSize: 20),
                   textAlign: TextAlign.center,
-                )),
+                ),
+              ),
+            ),
           ),
         ),
       );
@@ -36,7 +46,10 @@ class FloatingTooltip {
     overlay.insert(overlayEntry);
 
     Future.delayed(const Duration(seconds: 2), () {
-      overlayEntry.remove();
+      if (!isRemoved) {
+        isRemoved = true;
+        overlayEntry.remove();
+      }
     });
   }
 }
