@@ -240,9 +240,8 @@ Future<Game?> getGameFromId(int id) async {
   log.info("Looking up game $id");
   final game = await (database.select(database.games)
         ..where((row) => row.id.equals(id)))
-      .watchSingle()
-      .first;
-  return game;
+      .get();
+  return game.firstOrNull;
 }
 
 final database = AppDatabase();
