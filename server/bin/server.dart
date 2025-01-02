@@ -11,10 +11,31 @@ import 'package:shelf_router/shelf_router.dart';
 
 // Configure routes.
 final _router = Router()
+  ..post('/createUser', _createUserHandler)
   ..post('/create', _createGameHandler)
   ..get('/game/<id>', _getGameHandler)
   ..post('/game/<id>/play/<event>', _playHandler)
   ..get('/join/<id>', _joinHandler);
+
+Future<Response> _createUserHandler(Request request) async {
+  final form = request.formData();
+  if (form == null) {
+    return Response.badRequest(body: "No multipart form body");
+  }
+  // Read all form-data parameters into a single map:
+  final parameters = <String, String>{
+    await for (final formData in form.formData)
+      formData.name: await formData.part.readString(),
+  };
+  log.info("Received body: $parameters");
+  final user = await database.into(database.users).insertReturning(
+        UsersCompanion(
+          displayName: Value(parameters["displayName"] ?? "Player"),
+        ),
+      );
+
+  return Response.ok(user.toJson());
+}
 
 Future<Response> _createGameHandler(Request request) async {
   final uId = userId(request);
