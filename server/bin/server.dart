@@ -17,6 +17,8 @@ final _router = Router()
   ..post('/game/<id>/play/<event>', _playHandler)
   ..get('/join/<id>', _joinHandler);
 
+const middle = (5 * 2) + 3 - 1; // 2nd row, 3rd square, start at 0
+
 Future<Response> _createUserHandler(Request request) async {
   final form = request.formData();
   if (form == null) {
@@ -188,7 +190,7 @@ Future<Game> createGame({
   final game = await database.into(database.games).insertReturning(
         GamesCompanion(
           events: Value(jsonEncode(events)),
-          plays: Value(jsonEncode([])),
+          plays: Value(jsonEncode([middle])),
           boardIds: Value(jsonEncode([])),
           name: Value(name),
         ),
@@ -207,7 +209,6 @@ Future<Board> createBoard({
   events.shuffle();
 
   // Remove the wild card, and explicitly put it in the middle.
-  const middle = (5 * 2) + 3 - 1; // 2nd row, 3rd square, start at 0
   events.removeWhere((e) => e == middle);
   events.insert(middle, middle);
 
@@ -236,11 +237,12 @@ int? userId(Request request) {
 }
 
 Future<Game?> getGameFromId(int id) async {
-  // TODO: Error handle
   log.info("Looking up game $id");
+  // TODO: This isn't finding anything...
   final game = await (database.select(database.games)
         ..where((row) => row.id.equals(id)))
       .get();
+  log.info("Found $game");
   return game.firstOrNull;
 }
 

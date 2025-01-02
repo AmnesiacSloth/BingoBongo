@@ -53,6 +53,11 @@ class RestApi implements Api {
   }
 
   @override
+  Future<User> createUser({required String displayName}) async {
+    throw UnimplementedError();
+  }
+
+  @override
   int? userId;
 
   Options get userOptions {

@@ -12,6 +12,8 @@ abstract class Api {
   Future<Game> play(int gameId, int event);
 
   Future<(Game, Board)> get(int gameId);
+
+  Future<User> createUser({required String displayName});
 }
 
 class Game {
