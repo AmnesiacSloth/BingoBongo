@@ -141,7 +141,7 @@ Future<Response> _playHandler(Request request) async {
     return Response.badRequest(body: "event is not a valid number");
   }
 
-  final json = jsonDecode(game!.events) as List<dynamic>;
+  final json = jsonDecode(game.plays) as List<dynamic>;
   final events = json.map((son) => int.parse(son)).toList();
   events.add(event);
 
