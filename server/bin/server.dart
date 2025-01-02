@@ -84,7 +84,7 @@ Future<Response> _getGameHandler(Request request) async {
     return Response.badRequest(body: "id is not a valid number");
   }
   final game = await getGameFromId(id);
-  if (game != null) {
+  if (game == null) {
     return Response.notFound("Game not found");
   }
   return Response.ok(game!.toJson());
@@ -103,7 +103,7 @@ Future<Response> _joinHandler(Request request) async {
   // TODO: This should be a transaction :shrug:
 
   final game = await getGameFromId(id);
-  if (game != null) {
+  if (game == null) {
     return Response.notFound("Game not found");
   }
 
@@ -133,7 +133,7 @@ Future<Response> _playHandler(Request request) async {
   // TODO: This should be a transaction :shrug:
 
   final game = await getGameFromId(id);
-  if (game != null) {
+  if (game == null) {
     return Response.notFound("Game not found");
   }
   final event = int.tryParse(request.params['event'] ?? "");
