@@ -142,7 +142,7 @@ Future<Response> _playHandler(Request request) async {
   }
 
   final json = jsonDecode(game.plays) as List<dynamic>;
-  final events = json.map((son) => int.parse(son)).toList();
+  final events = json.map((son) => son as int).toList();
   events.add(event);
 
   log.info("Adding $event to game $id");
