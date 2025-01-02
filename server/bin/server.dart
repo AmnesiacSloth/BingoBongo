@@ -3,13 +3,14 @@ import 'dart:io';
 
 import 'package:drift/drift.dart';
 import 'package:server/database.dart';
+import 'package:server/log.dart';
 import 'package:shelf/shelf.dart';
 import 'package:shelf/shelf_io.dart';
 import 'package:shelf_router/shelf_router.dart';
 
 // Configure routes.
 final _router = Router()
-  ..get('/create', _createGameHandler)
+  ..post('/create', _createGameHandler)
   ..get('/game/<id>', _getGameHandler)
   ..post('/game/<id>/play/<event>', _playHandler)
   ..get('/join/<id>', _joinHandler);
@@ -19,7 +20,8 @@ Future<Response> _createGameHandler(Request request) async {
   if (uId == null) {
     return Response.badRequest(body: "USER_ID is not valid");
   }
-  final events = jsonDecode(request.params["events"] ?? "[]") as List<String>;
+  final json = jsonDecode(await request.readAsString());
+  final events = json["events"] as List<String>;
   if (events.length != 25) {
     return Response.badRequest(body: "need 25 events to create a game");
   }
@@ -179,6 +181,7 @@ int? gameId(Request request) {
 }
 
 int? userId(Request request) {
+  log.fine("Checking headers: ${request.headers}");
   final id = int.tryParse(request.headers["USER_ID"] ?? "");
   return id;
 }
