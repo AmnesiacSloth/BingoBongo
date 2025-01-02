@@ -159,8 +159,10 @@ Future<Board> createBoardForGame({
   required Game game,
 }) async {
   final board = await createBoard(uId: uId);
+  log.info("Created board ${board.id}");
 
-  final boardIds = jsonDecode(game.boardIds) as List<int>;
+  final json = jsonDecode(game.boardIds) as List<dynamic>;
+  final boardIds = json.map((son) => son as int).toList();
   boardIds.add(board.id);
 
   (database.update(database.games)..where((row) => row.id.equals(game.id)))
@@ -169,7 +171,8 @@ Future<Board> createBoardForGame({
       boardIds: Value(jsonEncode(boardIds)),
     ),
   );
-  log.info("Created board ${board.id}");
+
+  log.info("Added board ${board.id} to game ${game.id}");
 
   return board;
 }
@@ -204,6 +207,8 @@ Future<Board> createBoard({
   final middle = (5 * 2) + 3 - 1; // 2nd row, 3rd square, start at 0
   events.removeWhere((e) => e == middle);
   events.insert(middle, middle);
+
+  log.info("Shuffled events to $events");
 
   final board = await database.into(database.boards).insertReturning(
         BoardsCompanion(
