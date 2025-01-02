@@ -11,7 +11,7 @@ import 'package:shelf_router/shelf_router.dart';
 final _router = Router()
   ..get('/create', _createGameHandler)
   ..get('/game/<id>', _getGameHandler)
-  ..get('/game/<id>/play/<event>', _playHandler)
+  ..post('/game/<id>/play/<event>', _playHandler)
   ..get('/join/<id>', _joinHandler);
 
 Future<Response> _createGameHandler(Request request) async {

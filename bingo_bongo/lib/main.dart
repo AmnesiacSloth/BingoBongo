@@ -1,4 +1,7 @@
+import 'package:bingo_bongo/api/rest.dart';
 import 'package:flutter/material.dart';
+
+final api = RestApi();
 
 void main() {
   runApp(const MyApp());
