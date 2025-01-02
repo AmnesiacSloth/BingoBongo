@@ -42,6 +42,7 @@ Future<Response> _createGameHandler(Request request) async {
   if (uId == null) {
     return Response.badRequest(body: "USER_ID is not valid");
   }
+  log.info("Creating game for $uId");
   final form = request.formData();
   if (form == null) {
     return Response.badRequest(body: "No multipart form body");
@@ -55,7 +56,9 @@ Future<Response> _createGameHandler(Request request) async {
   if (!parameters.containsKey("events")) {
     return Response.badRequest(body: "form data does not include events");
   }
+  log.info("Parsed parameters $parameters");
   final json = jsonDecode(parameters["events"]!) as List<dynamic>;
+  log.info("Parsed $json");
   final events = json.map((son) => son as String).toList();
   if (events.length != 25) {
     return Response.badRequest(body: "need 25 events to create a game");
@@ -166,6 +169,7 @@ Future<Board> createBoardForGame({
       boardIds: Value(jsonEncode(boardIds)),
     ),
   );
+  log.info("Created board ${board.id}");
 
   return board;
 }
@@ -183,6 +187,7 @@ Future<Game> createGame({
           name: Value(name),
         ),
       );
+  log.info("Created game ${game.id}");
 
   return game;
 }
