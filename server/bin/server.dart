@@ -142,16 +142,16 @@ Future<Response> _playHandler(Request request) async {
   }
 
   final json = jsonDecode(game.plays) as List<dynamic>;
-  final events = json.map((son) => son as int).toList();
-  events.add(event);
-
+  final plays = json.map((son) => son as int).toList();
+  plays.add(event);
+  log.info("Updated events $plays");
   log.info("Adding $event to game $id");
 
   final newGame = await (database.update(database.games)
         ..whereSamePrimaryKey(game))
       .writeReturning(
     GamesCompanion(
-      events: Value(jsonEncode(events)),
+      plays: Value(jsonEncode(plays)),
     ),
   );
 
