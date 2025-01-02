@@ -3,10 +3,9 @@ import 'package:flutter/material.dart';
 
 // -- Widgets -- //
 import 'widgets/CustomAppBar.dart';
-import 'widgets/board.dart';
+import 'widgets/BingoBoard.dart';
 
 final api = RestApi();
-
 void main() {
   runApp(const MyApp());
 }
@@ -44,7 +43,7 @@ class _MyHomePageState extends State<MyHomePage> {
     return Scaffold(
       appBar: CustomAppBar(title: widget.title),
       backgroundColor: const Color.fromARGB(221, 36, 32, 32),
-      body: board(context),
+      body: BingoBoard(context),
     );
   }
 }

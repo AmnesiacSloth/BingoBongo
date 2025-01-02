@@ -1,3 +1,4 @@
+import 'package:bingo_bongo/widgets/FloatingTooltip.dart';
 import 'package:flutter/material.dart';
 
 class Tile extends StatefulWidget {
@@ -16,16 +17,25 @@ class _TileState extends State<Tile> {
   // instance bool, controls individual tile
   bool _isChecked = false;
 
+  void _toggleColor() {
+    setState(() {
+      _isChecked = !_isChecked;
+    });
+  }
+
+  void _showTooltip() {
+    FloatingTooltip.showFloatingTooltip(
+      context: context,
+      messages: 'Tile index: ${widget.index}',
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return ElevatedButton(
       key: ValueKey("bingo-button-${widget.index}"),
-      onLongPress: () => {
-        setState(() {
-          _isChecked = !_isChecked;
-        })
-      },
-      onPressed: () => {print('${widget.index}')}, // TODO
+      onLongPress: () => {_toggleColor()},
+      onPressed: () => {}, // TODO
       style: ElevatedButton.styleFrom(
         backgroundColor:
             _isChecked ? const Color.fromARGB(255, 94, 201, 96) : Colors.red,
