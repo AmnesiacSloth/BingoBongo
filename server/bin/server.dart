@@ -87,7 +87,7 @@ Future<Response> _getGameHandler(Request request) async {
   if (game == null) {
     return Response.notFound("Game not found");
   }
-  return Response.ok(game!.toJson());
+  return Response.ok(jsonEncode(game.toJson()));
 }
 
 Future<Response> _joinHandler(Request request) async {
