@@ -109,6 +109,7 @@ Future<Response> _joinHandler(Request request) async {
 
   final boardIds = jsonDecode(game!.boardIds) as List<int>;
   boardIds.add(board.id);
+  log.info("Adding ${board.id} to $id");
 
   (database.update(database.games)..where((row) => row.id.equals(game.id)))
       .write(GamesCompanion(
@@ -140,6 +141,8 @@ Future<Response> _playHandler(Request request) async {
 
   final events = jsonDecode(game!.events) as List<int>;
   events.add(event);
+
+  log.info("Adding $event to game $id");
 
   final newGame = await (database.update(database.games)
         ..whereSamePrimaryKey(game))
@@ -204,7 +207,7 @@ Future<Board> createBoard({
   events.shuffle();
 
   // Remove the wild card, and explicitly put it in the middle.
-  final middle = (5 * 2) + 3 - 1; // 2nd row, 3rd square, start at 0
+  const middle = (5 * 2) + 3 - 1; // 2nd row, 3rd square, start at 0
   events.removeWhere((e) => e == middle);
   events.insert(middle, middle);
 
@@ -234,6 +237,7 @@ int? userId(Request request) {
 
 Future<Game?> getGameFromId(int id) async {
   // TODO: Error handle
+  log.info("Looking up game $id");
   final game = await (database.select(database.games)
         ..where((row) => row.id.equals(id)))
       .watchSingle()
