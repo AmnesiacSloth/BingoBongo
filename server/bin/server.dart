@@ -179,6 +179,7 @@ Future<Board> createBoard({
   final board = await database.into(database.boards).insertReturning(
         BoardsCompanion(
           board: Value(jsonEncode(events)),
+          playerId: Value(uId),
         ),
       );
 

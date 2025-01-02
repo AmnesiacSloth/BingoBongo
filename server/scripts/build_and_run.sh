@@ -1,5 +1,7 @@
 #!/bin/bash
 
+echo "Stopping previous instance..."
+
 docker stop $(docker ps -q --filter ancestor=bingobongo )
 
 docker build . -t bingobongo
