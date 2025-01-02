@@ -6,6 +6,7 @@ import 'package:server/database.dart';
 import 'package:server/log.dart';
 import 'package:shelf/shelf.dart';
 import 'package:shelf/shelf_io.dart';
+import 'package:shelf_multipart/shelf_multipart.dart';
 import 'package:shelf_router/shelf_router.dart';
 
 // Configure routes.
@@ -20,8 +21,18 @@ Future<Response> _createGameHandler(Request request) async {
   if (uId == null) {
     return Response.badRequest(body: "USER_ID is not valid");
   }
-  final json = jsonDecode(await request.readAsString());
-  final events = json["events"] as List<String>;
+  final form = request.formData();
+  if (form == null) {
+    return Response.badRequest(body: "No multipart form body");
+  }
+  // Read all form-data parameters into a single map:
+  final parameters = <String, String>{
+    await for (final formData in form.formData)
+      formData.name: await formData.part.readString(),
+  };
+  log.info("Received body: $parameters");
+  final json = jsonDecode(parameters["events"] ?? "[]") as List<dynamic>;
+  final events = json.map((son) => son as String).toList();
   if (events.length != 25) {
     return Response.badRequest(body: "need 25 events to create a game");
   }
