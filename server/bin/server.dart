@@ -109,7 +109,8 @@ Future<Response> _joinHandler(Request request) async {
 
   final board = await createBoard(uId: uId);
 
-  final boardIds = jsonDecode(game!.boardIds) as List<int>;
+  final json = jsonDecode(game!.boardIds) as List<dynamic>;
+  final boardIds = json.map((son) => son as int).toList();
   boardIds.add(board.id);
   log.info("Adding ${board.id} to $id");
 
@@ -143,6 +144,9 @@ Future<Response> _playHandler(Request request) async {
 
   final json = jsonDecode(game.plays) as List<dynamic>;
   final plays = json.map((son) => son as int).toList();
+  if (plays.contains(event)) {
+    return Response.badRequest(body: "$event already played");
+  }
   plays.add(event);
   log.info("Updated events $plays");
   log.info("Adding $event to game $id");
