@@ -35,7 +35,7 @@ class _TileState extends State<Tile> {
     return ElevatedButton(
       key: ValueKey("bingo-button-${widget.index}"),
       onLongPress: () => {_toggleColor()},
-      onPressed: () => {}, // TODO
+      onPressed: () => {_showTooltip()},
       style: ElevatedButton.styleFrom(
         backgroundColor:
             _isChecked ? const Color.fromARGB(255, 94, 201, 96) : Colors.red,
