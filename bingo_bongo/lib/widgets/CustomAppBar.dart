@@ -26,7 +26,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
       title: Text(title),
       actions: [
         Icon(size: 35, Icons.leaderboard),
-        Icon(size: 35, Icons.settings),
+        Icon(size: 35, Icons.person),
       ],
     );
   }
