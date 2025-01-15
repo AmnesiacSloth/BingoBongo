@@ -36,7 +36,10 @@ Future<Response> _createUserHandler(Request request) async {
         ),
       );
 
-  return Response.ok(user.toJson());
+  return Response.ok(
+    user.toJsonString(),
+    headers: {'Content-Type': 'application/json'},
+  );
 }
 
 Future<Response> _createGameHandler(Request request) async {
