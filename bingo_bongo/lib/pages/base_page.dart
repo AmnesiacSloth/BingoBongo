@@ -2,20 +2,18 @@ import 'package:flutter/material.dart';
 import 'package:bingo_bongo/widgets/BingoBoard.dart';
 import 'package:bingo_bongo/widgets/CustomAppBar.dart';
 
-class MyHomePage extends StatefulWidget {
-  const MyHomePage({super.key, required this.title});
+class BasePage extends StatelessWidget {
+  const BasePage({super.key, required this.title, required this.gamecode});
 
   final String title;
-
-  @override
-  State<MyHomePage> createState() => _MyHomePageState();
-}
-
-class _MyHomePageState extends State<MyHomePage> {
+  final int gamecode;
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: CustomAppBar(title: widget.title),
+      appBar: CustomAppBar(
+        title: title,
+        gamecode: gamecode,
+      ),
       backgroundColor: const Color.fromARGB(221, 36, 32, 32),
       body: BingoBoard(context),
     );

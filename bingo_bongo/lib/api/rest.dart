@@ -61,6 +61,7 @@ class RestApi implements Api {
     final json = response.data as JsonMap;
     // return custom User object with the ID and displayName set from
     // the returned response (via factory constructor)
+
     return (User.fromJson(json));
   }
 

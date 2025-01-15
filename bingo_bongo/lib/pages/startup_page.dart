@@ -1,44 +1,48 @@
 import 'package:flutter/material.dart';
 import 'package:bingo_bongo/api/rest.dart';
-import 'package:bingo_bongo/api/api.dart';
-// -- Pages for Navigation -- //
-import 'package:bingo_bongo/pages/base_page.dart';
-// -- Widgets -- //
+import 'package:shared_preferences/shared_preferences.dart';
 
-// TODO: May need to pass this in from main.dart instead of creating many
-// instances of this class
 final api = RestApi();
 
-// TODO: FIND WAY TO PARSE LOCAL STORAGE FOR USER ID ASSOCIATED WITH THIS DEVICE
 class StartupPage extends StatefulWidget {
-  const StartupPage({super.key});
+  final SharedPreferences prefs;
+  const StartupPage({super.key, required this.prefs});
 
   @override
   State<StartupPage> createState() => _StartupPageState();
 }
 
 class _StartupPageState extends State<StartupPage> {
+  // Function to save value to SharedPreferences
+  void _saveUsernameUID(String username, int uid) async {
+    await widget.prefs.setString("_username", username);
+    await widget.prefs.setInt("_userid", uid);
+  }
+
+  @override
+  void initState() {
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
-    // text editing controller to access user input
-    TextEditingController usernameController = TextEditingController();
-
-    // TODO: check for locally stored user id / username first
-    Future<void> _getOrCreateUserInfo(String userName) async {
+    Future<void> _createUserInfo(String userName) async {
       try {
-        print(usernameController.text);
+        // create user in database and save credentials to shareds prefs
         final currentUser = await api.createUser(displayName: userName);
-        Navigator.push(
-            context,
-            MaterialPageRoute(
-                builder: (context) =>
-                    MyHomePage(title: currentUser.displayName)));
+        _saveUsernameUID(currentUser.displayName, currentUser.id);
+        Navigator.pushNamed(context, '/basepage');
       } on Exception catch (error) {
         ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Error creating user: $error')));
+          SnackBar(
+            content: Text('Error creating user: $error'),
+          ),
+        );
       }
     }
 
+    // text editing controller to access user input
+    TextEditingController usernameController = TextEditingController();
     return Scaffold(
         appBar: AppBar(
           title: Text(
@@ -57,12 +61,13 @@ class _StartupPageState extends State<StartupPage> {
               TextField(
                 controller: usernameController,
                 decoration: InputDecoration(
-                    hintText: "Enter your username here",
-                    border: OutlineInputBorder()),
+                  hintText: "Enter your username here",
+                  border: OutlineInputBorder(),
+                ),
               ),
               ElevatedButton(
-                onPressed: () => _getOrCreateUserInfo(usernameController.text),
-                child: Text("Waddup slime"),
+                onPressed: () => _createUserInfo(usernameController.text),
+                child: Text("waddup slime"),
               ),
             ],
           ),

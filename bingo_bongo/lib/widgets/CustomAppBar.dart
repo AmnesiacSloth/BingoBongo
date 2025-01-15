@@ -3,11 +3,12 @@ import 'package:flutter/material.dart';
 class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   final double height;
   final String title;
-
-  CustomAppBar({
+  final int gamecode;
+  const CustomAppBar({
     Key? key,
     this.height = 80,
     required this.title,
+    required this.gamecode,
   }) : super(key: key);
 
   @override
@@ -18,7 +19,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
       leading: Center(
         child: Padding(
           padding: const EdgeInsets.only(left: 12),
-          child: Text('Game code : ####'),
+          child: Text('Game code : $gamecode'),
         ),
       ),
       centerTitle: true,
