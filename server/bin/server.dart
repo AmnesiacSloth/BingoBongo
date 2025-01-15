@@ -36,7 +36,7 @@ Future<Response> _createUserHandler(Request request) async {
         ),
       );
 
-  return Response.ok(user.toJsonString());
+  return Response.ok(user.toJson());
 }
 
 Future<Response> _createGameHandler(Request request) async {
