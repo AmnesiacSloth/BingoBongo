@@ -15,7 +15,11 @@ class BasePage extends StatelessWidget {
         gamecode: gamecode,
       ),
       backgroundColor: const Color.fromARGB(221, 36, 32, 32),
-      body: BingoBoard(context),
+      body: BingoBoard(
+        gamename: "gamename",
+        plays: [],
+        layout: [],
+      ),
     );
   }
 }
